@@ -150,6 +150,7 @@ function TipTap(props: TipTapProps) {
   const isUserPremium = useIsUserPremium();
   const autoSave = useRef(true);
   const { toolbarConfig } = useToolbarConfig();
+  const activeSession = useEditorStore().getActiveSession(["default"]);
 
   usePermissionHandler({
     claims: {
@@ -198,7 +199,7 @@ function TipTap(props: TipTapProps) {
       timeFormat,
       element: editorContainer(),
       editable: !readonly,
-      content: content?.(),
+      // content: content?.(),
       autofocus: "start",
       onFocus,
       onCreate: async ({ editor }) => {
@@ -314,8 +315,13 @@ function TipTap(props: TipTapProps) {
     markdownShortcuts
   ]);
 
+  const activeSessionContent = activeSession?.content?.data;
+
   const editor = useTiptap(
-    tiptapOptions,
+    {
+      ...tiptapOptions,
+      content: activeSessionContent
+    },
     // IMPORTANT: only put stuff here that the editor depends on.
     [tiptapOptions]
   );
