@@ -288,6 +288,19 @@ function updateSelection(
   isDocChanged: boolean,
   defaultLanguage: () => string | null | undefined
 ) {
+  let isCodeBlockAdded = false;
+  // https://discuss.prosemirror.net/t/changed-part-of-document/992/6
+  const from = oldState.doc.content.findDiffStart(newState.doc.content);
+  const to = oldState.doc.content.findDiffEnd(newState.doc.content);
+  if (!from || !to || from === to.b) {
+    return;
+  }
+  newState.doc.nodesBetween(from, to.b, (node, pos) => {
+    if (node.type.name === name) {
+      isCodeBlockAdded = true;
+    }
+  });
+
   const oldNodeName = oldState.selection.$head.parent.type.name;
   const newNodeName = newState.selection.$head.parent.type.name;
 
@@ -314,6 +327,7 @@ function updateSelection(
       isDocChanged ? toCodeLines(node.textContent, pos) : undefined
     );
     attributes.caretPosition = position;
+    console.log("code block", { isCodeBlockAdded });
     attributes.language = node.attrs.language ?? defaultLanguage();
 
     const { tr } = newState;
