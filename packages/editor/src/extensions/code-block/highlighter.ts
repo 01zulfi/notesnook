@@ -31,6 +31,7 @@ import { toCaretPosition, toCodeLines } from "./utils.js";
 import Languages from "./languages.json";
 import { isLanguageLoaded, loadLanguage } from "./loader.js";
 import { getChangedNodes } from "../../utils/prosemirror.js";
+import { Node } from "@tiptap/pm/model";
 
 export type ReplaceMergedStep = ReplaceAroundStep | ReplaceStep;
 
@@ -270,15 +271,55 @@ export function HighlighterPlugin({
     },
     appendTransaction(transactions, oldState, newState) {
       const isDocChanged = transactions.some((tr) => tr.docChanged);
+
+      const { newAdded } = compareDocuments(oldState.doc, newState.doc);
+      let isCodeBlockNew = false;
+      newAdded.forEach((block) => {
+        if (block.child.type.name === name) isCodeBlockNew = true;
+      });
+
       return updateSelection(
         name,
         oldState,
         newState,
         isDocChanged,
-        defaultLanguage
+        defaultLanguage,
+        isCodeBlockNew
       );
     }
   });
+}
+
+// https://discuss.prosemirror.net/t/changed-part-of-document/992/3
+function compareDocuments(oldDocument: Node, newDocument: Node) {
+  let diff = new Map<Node, number>();
+  let removed: { child: Node; position: number }[] = [];
+
+  newDocument.content.forEach((child, position) => {
+    diff.set(child, position);
+  });
+
+  oldDocument.content.forEach((child, position) => {
+    if (diff.has(child)) {
+      diff.delete(child);
+    } else {
+      removed.push({ child: child, position: position });
+    }
+  });
+
+  let added = Array.from(diff.entries()).map((value) => {
+    return { child: value[0], position: value[1] };
+  });
+
+  const newAdded = added.filter((value) => {
+    // when the page loads there is a paragraph node with null blockId, no idea why
+    if (removed.some((r) => r.child.attrs.blockId === null)) return false;
+    return removed.every((removedValue) => {
+      return removedValue.child.attrs.blockId !== value.child.attrs.blockId;
+    });
+  });
+
+  return { removed, added, newAdded };
 }
 
 function updateSelection(
@@ -286,21 +327,9 @@ function updateSelection(
   oldState: EditorState,
   newState: EditorState,
   isDocChanged: boolean,
-  defaultLanguage: () => string | null | undefined
+  defaultLanguage: () => string | null | undefined,
+  isCodeBlockNew: boolean
 ) {
-  let isCodeBlockAdded = false;
-  // https://discuss.prosemirror.net/t/changed-part-of-document/992/6
-  const from = oldState.doc.content.findDiffStart(newState.doc.content);
-  const to = oldState.doc.content.findDiffEnd(newState.doc.content);
-  if (!from || !to || from === to.b) {
-    return;
-  }
-  newState.doc.nodesBetween(from, to.b, (node, pos) => {
-    if (node.type.name === name) {
-      isCodeBlockAdded = true;
-    }
-  });
-
   const oldNodeName = oldState.selection.$head.parent.type.name;
   const newNodeName = newState.selection.$head.parent.type.name;
 
@@ -327,8 +356,9 @@ function updateSelection(
       isDocChanged ? toCodeLines(node.textContent, pos) : undefined
     );
     attributes.caretPosition = position;
-    console.log("code block", { isCodeBlockAdded });
-    attributes.language = node.attrs.language ?? defaultLanguage();
+    if (isCodeBlockNew) {
+      attributes.language = node.attrs.language ?? defaultLanguage();
+    }
 
     const { tr } = newState;
     tr.setMeta("preventUpdate", true);
