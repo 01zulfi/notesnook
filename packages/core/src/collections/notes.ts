@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { getId } from "../utils/id.js";
 import { getContentFromData } from "../content-types/index.js";
-import { NEWLINE_STRIP_REGEX, formatTitle } from "../utils/title-format.js";
+import { formatTitle } from "../utils/title-format.js";
 import { clone } from "../utils/clone.js";
 import { Tiptap } from "../content-types/tiptap.js";
 import { EMPTY_CONTENT } from "./content.js";
@@ -110,7 +110,6 @@ export class Notes implements ICollection {
       }
 
       if (typeof item.title !== "undefined") {
-        item.title = item.title.replace(NEWLINE_STRIP_REGEX, " ");
         dateEdited = Date.now();
       }
 

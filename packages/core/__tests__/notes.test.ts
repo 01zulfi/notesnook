@@ -166,11 +166,11 @@ test("note title should allow trailing space", () =>
     }
   ));
 
-test("note title should not allow newlines", () =>
+test("note title should allow newlines", () =>
   noteTest({ title: "Hello\nhello", content: TEST_NOTE.content }).then(
     async ({ db, id }) => {
       const note = await db.notes.note(id);
-      expect(note?.title).toBe("Hello hello");
+      expect(note?.title).toBe("Hello\nhello");
     }
   ));
 
