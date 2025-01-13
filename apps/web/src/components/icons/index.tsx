@@ -219,7 +219,8 @@ import {
   mdiOpenInNew,
   mdiTagOutline,
   mdiChatQuestionOutline,
-  mdiNoteRemoveOutline
+  mdiNoteRemoveOutline,
+  mdiRadar
 } from "@mdi/js";
 import { useTheme } from "@emotion/react";
 import { Theme } from "@notesnook/theme";
@@ -560,3 +561,4 @@ export const ClearCache = createIcon(mdiBroom);
 export const OpenInNew = createIcon(mdiOpenInNew);
 export const Coupon = createIcon(mdiTagOutline);
 export const Support = createIcon(mdiChatQuestionOutline);
+export const Radar = createIcon(mdiRadar);
