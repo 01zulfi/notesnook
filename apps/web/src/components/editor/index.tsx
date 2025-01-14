@@ -73,10 +73,11 @@ import { strings } from "@notesnook/intl";
 import { onPageVisibilityChanged } from "../../utils/page-visibility";
 import { Pane, SplitPane } from "../split-pane";
 import { TITLE_BAR_HEIGHT } from "../title-bar";
+import { useTabKeyboardShortcuts } from "./use-tab-keyboard-shortcuts";
 
 const PDFPreview = React.lazy(() => import("../pdf-preview"));
 
-const autoSaveToast = { show: true, hide: () => { } };
+const autoSaveToast = { show: true, hide: () => {} };
 
 async function saveContent(
   noteId: string,
@@ -125,30 +126,7 @@ export default function TabsView() {
   const isTOCVisible = useEditorStore((store) => store.isTOCVisible);
   const [dropRef, overlayRef] = useDragOverlay();
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.altKey &&
-        event.key === "ArrowRight"
-      ) {
-        event.preventDefault();
-        useEditorStore.getState().openNextSession();
-      }
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.altKey &&
-        event.key === "ArrowLeft"
-      ) {
-        event.preventDefault();
-        useEditorStore.getState().openPreviousSession();
-      }
-    };
-    document.body.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
+  useTabKeyboardShortcuts();
 
   return (
     <>
@@ -252,10 +230,10 @@ function EditorView({
   session
 }: {
   session:
-  | DefaultEditorSession
-  | NewEditorSession
-  | ReadonlyEditorSession
-  | DeletedEditorSession;
+    | DefaultEditorSession
+    | NewEditorSession
+    | ReadonlyEditorSession
+    | DeletedEditorSession;
 }) {
   const lastChangedTime = useRef<number>(0);
   const root = useRef<HTMLDivElement>(null);

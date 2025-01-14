@@ -367,7 +367,7 @@ export const TaskListNode = TaskList.extend({
 
   addKeyboardShortcuts() {
     return {
-      "Mod-Shift-T": () => this.editor.commands.toggleTaskList()
+      "Mod-Alt-Shift-T": () => this.editor.commands.toggleTaskList()
     };
   }
 });

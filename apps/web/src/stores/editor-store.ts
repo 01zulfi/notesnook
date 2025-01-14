@@ -170,6 +170,7 @@ class EditorStore extends BaseStore<EditorStore> {
   isTOCVisible = Config.get("editor:toc", false);
   editorMargins = Config.get("editor:margins", true);
   history: string[] = [];
+  closedSessionsStack: string[][] = [];
 
   getSession = <T extends SessionType[]>(id: string, types?: T) => {
     return this.get().sessions.find(
@@ -743,6 +744,19 @@ class EditorStore extends BaseStore<EditorStore> {
     return this.openSession(sessions[index - 1].id);
   };
 
+  closeActiveSession = () => {
+    const { activeSessionId } = this.get();
+    if (activeSessionId) this.closeSessions(activeSessionId);
+  };
+
+  undoCloseSession = () => {
+    const { closedSessionsStack } = this.get();
+    if (closedSessionsStack.length === 0) return;
+    const lastClosed = closedSessionsStack.pop();
+    if (!lastClosed) return;
+    lastClosed.forEach((id) => this.openSession(id, { newSession: true }));
+  };
+
   addSession = (session: EditorSession, activate = true) => {
     let oldSessionId: string | null = null;
 
@@ -956,7 +970,10 @@ class EditorStore extends BaseStore<EditorStore> {
       state.sessions = sessions;
     });
 
-    const { history, sessions } = this.get();
+    const { history, sessions, closedSessionsStack } = this.get();
+    if (ids.length !== 0) {
+      this.set({ closedSessionsStack: [...closedSessionsStack, ids] });
+    }
     this.activateSession(history.pop());
     if (sessions.length === 0) this.newSession();
   };

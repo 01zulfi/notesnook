@@ -294,7 +294,7 @@ const tasklist = (editor: Editor): MenuItem => ({
   icon: Icons.checkbox,
   isChecked: editor.isActive("taskList"),
   onClick: () => editor.chain().focus().toggleTaskList().run(),
-  modifier: "Mod-Shift-T"
+  modifier: "Mod-Alt-Shift-T"
 });
 
 const outlinelist = (editor: Editor): MenuItem => ({
