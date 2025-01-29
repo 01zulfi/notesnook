@@ -23,7 +23,14 @@ import { useEditorStore } from "../stores/editor-store";
 import { useStore as useSearchStore } from "../stores/search-store";
 import { useEditorManager } from "../components/editor/manager";
 
-const KEYMAP = [
+type TKeyMap = {
+  keys: string[];
+  description: string;
+  global: boolean;
+  action: (e: KeyboardEvent) => void;
+};
+
+const KEYMAP: TKeyMap[] = [
   // {
   //   keys: ["command+n", "ctrl+n", "command+alt+n", "ctrl+alt+n"],
   //   description: "Create a new note",
@@ -77,7 +84,7 @@ const KEYMAP = [
 
       useSearchStore.setState({ isSearching: true, searchType: "notes" });
     }
-  }
+  },
   // {
   //   keys: ["alt+n"],
   //   description: "Go to Notes",
@@ -141,6 +148,51 @@ const KEYMAP = [
   //     themestore.get().toggleNightMode();
   //   },
   // },
+  {
+    keys: ["ctrl+alt+right", "ctrl+tab", "command+tab"],
+    description: "Go to next tab",
+    global: false,
+    action: (e) => {
+      e.preventDefault();
+      useEditorStore.getState().openNextSession();
+    }
+  },
+  {
+    keys: ["ctrl+alt+left", "ctrl+shift+tab", "command+shift+tab"],
+    description: "Go to previous tab",
+    global: false,
+    action: (e) => {
+      e.preventDefault();
+      useEditorStore.getState().openPreviousSession();
+    }
+  },
+  {
+    keys: ["ctrl+w", "command+w"],
+    description: "Close active tab",
+    global: false,
+    action: (e) => {
+      e.preventDefault();
+      useEditorStore.getState().closeActiveSession();
+    }
+  },
+  {
+    keys: ["ctrl+t", "ctrl+n", "command+t", "command+n"],
+    description: "Create a new tab",
+    global: false,
+    action: (e) => {
+      e.preventDefault();
+      useEditorStore.getState().newSession();
+    }
+  },
+  {
+    keys: ["ctrl+shift+t", "command+shift+t"],
+    description: "Undo close tab",
+    global: false,
+    action: (e) => {
+      e.preventDefault();
+      useEditorStore.getState().undoCloseSession();
+    }
+  }
 ];
 
 export function registerKeyMap() {
