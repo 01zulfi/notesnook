@@ -167,9 +167,8 @@ const KEYMAP = [
   //   },
   // },
   {
-    keys: ["ctrl+k"],
+    keys: ["ctrl+k", "cmd+k"],
     description: "Open command palette",
-    global: false,
     action: (e: KeyboardEvent) => {
       e.preventDefault();
       CommandPaletteDialog.show(true);
