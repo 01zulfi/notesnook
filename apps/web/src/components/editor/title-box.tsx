@@ -27,8 +27,6 @@ import React, {
 import { Textarea } from "@theme-ui/components";
 import { useEditorStore } from "../../stores/editor-store";
 import { debounceWithId } from "@notesnook/common";
-import useMobile from "../../hooks/use-mobile";
-import useTablet from "../../hooks/use-tablet";
 import { useEditorConfig, useEditorManager } from "./manager";
 import { getFontById } from "@notesnook/editor";
 import { replaceDateTime } from "@notesnook/editor";
@@ -47,8 +45,6 @@ function TitleBox(props: TitleBoxProps) {
   const pendingChanges = useRef(false);
   // const id = useStore((store) => store.session.id);
   const sessionType = useEditorStore((store) => store.getSession(id)?.type);
-  const isMobile = useMobile();
-  const isTablet = useTablet();
   const { editorConfig } = useEditorConfig();
   const dateFormat = useSettingsStore((store) => store.dateFormat);
   const timeFormat = useSettingsStore((store) => store.timeFormat);
@@ -56,18 +52,6 @@ function TitleBox(props: TitleBoxProps) {
   const fontFamily = useMemo(
     () => getFontById(editorConfig.fontFamily)?.font || "heading",
     [editorConfig.fontFamily]
-  );
-
-  const updateFontSize = useCallback(
-    (length: number) => {
-      if (!inputRef.current) return;
-      const fontSize = textLengthToFontSize(
-        length,
-        isMobile || isTablet ? 1.625 : 2.625
-      );
-      inputRef.current.style.fontSize = `${fontSize}em`;
-    },
-    [isMobile, isTablet]
   );
 
   useLayoutEffect(() => {
@@ -83,13 +67,7 @@ function TitleBox(props: TitleBoxProps) {
       inputRef.current,
       (input) => (input.value = title || "")
     );
-    updateFontSize(title?.length || 0);
-  }, [sessionType, id, updateFontSize]);
-
-  useEffect(() => {
-    if (!inputRef.current) return;
-    updateFontSize(inputRef.current.value.length);
-  }, [isTablet, isMobile, updateFontSize]);
+  }, [sessionType, id]);
 
   useEffect(() => {
     const { unsubscribe } = AppEventManager.subscribe(
@@ -108,7 +86,6 @@ function TitleBox(props: TitleBoxProps) {
           inputRef.current,
           (input) => (input.value = title)
         );
-        updateFontSize(title.length);
         if (!preventSave) {
           pendingChanges.current = true;
           debouncedOnTitleChange(sessionId, sessionId, title, pendingChanges);
@@ -119,7 +96,7 @@ function TitleBox(props: TitleBoxProps) {
     return () => {
       unsubscribe();
     };
-  }, [updateFontSize, id]);
+  }, [id]);
 
   return (
     <Textarea
@@ -170,7 +147,6 @@ function TitleBox(props: TitleBoxProps) {
           timeFormat
         );
         debouncedOnTitleChange(id, id, e.target.value, pendingChanges);
-        updateFontSize(e.target.value.length);
       }}
     />
   );
@@ -190,13 +166,6 @@ function onTitleChange(
 }
 
 const debouncedOnTitleChange = debounceWithId(onTitleChange, 100);
-
-function textLengthToFontSize(length: number, max: number) {
-  const stepLength = 35;
-  const decreaseStep = 0.5;
-  const steps = length / stepLength;
-  return Math.max(1.2, Math.min(max, max - steps * decreaseStep));
-}
 
 function withSelectionPersist(
   input: HTMLTextAreaElement,
