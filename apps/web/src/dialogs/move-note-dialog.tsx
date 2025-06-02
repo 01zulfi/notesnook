@@ -27,7 +27,8 @@ import {
   CheckIntermediate,
   CheckRemove,
   CircleEmpty,
-  ChevronRight
+  ChevronRight,
+  Lock
 } from "../components/icons";
 import { db } from "../common/db";
 import Dialog from "../components/dialog";
@@ -53,6 +54,7 @@ export type SelectedReference = {
   id: string;
   new: boolean;
   op: "add" | "remove";
+  isLocked?: boolean;
 };
 
 interface ISelectionStore {
@@ -395,6 +397,13 @@ export function NotebookItem(props: {
         <Text className="title" data-test-id="notebook-title" variant="body">
           {notebook.title}
         </Text>
+        {notebook.password ? (
+          <Lock
+            title="This notebook is locked"
+            size={14}
+            sx={{ px: 1, opacity: 0.7 }}
+          />
+        ) : null}
       </Flex>
       <Flex data-test-id="notebook-tools" sx={{ alignItems: "center" }}>
         <Button
