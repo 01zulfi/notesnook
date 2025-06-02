@@ -30,7 +30,8 @@ import {
   Shortcut,
   Trash,
   Notebook as NotebookIcon,
-  ArrowUp
+  ArrowUp,
+  Lock
 } from "../icons";
 import { MenuItem } from "@notesnook/ui";
 import { hashNavigate, navigate } from "../../navigation";
@@ -45,6 +46,8 @@ import { strings } from "@notesnook/intl";
 import { db } from "../../common/db";
 import { createSetDefaultHomepageMenuItem } from "../../common";
 import { useStore as useNotebookStore } from "../../stores/notebook-store";
+import { NotebookLock } from "../../common/NotebookLock";
+import { isUserPremium } from "../../hooks/use-is-user-premium";
 
 type NotebookProps = {
   item: NotebookType;
@@ -198,6 +201,21 @@ export const notebookMenuItems: (
       title: strings.edit(),
       icon: NotebookEdit.path,
       onClick: () => hashNavigate(`/notebooks/${notebook.id}/edit`)
+    },
+    {
+      type: "button",
+      key: "lock",
+      title: strings.lock(),
+      icon: Lock.path,
+      isChecked: Boolean(notebook.password),
+      isHidden: !isUserPremium(),
+      onClick: async () => {
+        if (notebook.password) {
+          NotebookLock.unlock(notebook.id);
+        } else {
+          NotebookLock.lock(notebook.id);
+        }
+      }
     },
     {
       type: "button",
