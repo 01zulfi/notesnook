@@ -101,10 +101,14 @@ export const MoveNoteDialog = DialogManager.register(function MoveNoteDialog({
         if (isSelected) continue;
 
         if (await notebookHasNotes(notebookId, noteIds)) {
+          const isLocked = Boolean(
+            (await db.notebooks.notebook(notebookId))?.password
+          );
           selected.push({
             id: notebookId,
             op: "add",
-            new: false
+            new: false,
+            isLocked
           });
         }
       }
@@ -142,6 +146,12 @@ export const MoveNoteDialog = DialogManager.register(function MoveNoteDialog({
           const { selected } = useSelectionStore.getState();
           for (const item of selected) {
             try {
+              if (item.isLocked) {
+                await db.notes.removeFromAllNotebooks(...noteIds);
+                await db.notes.addToNotebook(item.id, ...noteIds);
+                break;
+              }
+
               if (item.op === "remove") {
                 await db.notes.removeFromNotebook(item.id, ...noteIds);
               } else if (item.op === "add") {
@@ -347,6 +357,18 @@ export function NotebookItem(props: {
 
       const { selected } = useSelectionStore.getState();
 
+      const isCurrentLocked = Boolean(notebook.password);
+      const hasLockedSelected = selected.some((s) => s.isLocked);
+      if (isCurrentLocked || hasLockedSelected) {
+        if (selected.find((s) => s.id === notebook.id)) {
+          setSelected([]);
+        } else {
+          setSelected([createSelection(notebook)]);
+        }
+        setIsMultiselect(false);
+        return;
+      }
+
       const isCtrlPressed = e.ctrlKey || e.metaKey;
       if (isCtrlPressed) setIsMultiselect(true);
 
@@ -399,7 +421,7 @@ export function NotebookItem(props: {
         </Text>
         {notebook.password ? (
           <Lock
-            title="This notebook is locked"
+            title="This notebook is locked, selecting it will remove other selections"
             size={14}
             sx={{ px: 1, opacity: 0.7 }}
           />
@@ -462,7 +484,8 @@ function createSelection(item: { id: string }): SelectedReference {
   return {
     id: item.id,
     op: "add",
-    new: true
+    new: true,
+    isLocked: Boolean(notebook.password)
   };
 }
 

@@ -32,7 +32,8 @@ import {
   Notebook as NotebookIcon,
   ArrowUp,
   Move,
-  Lock
+  Lock,
+  UnlockVariant
 } from "../icons";
 import { MenuItem } from "@notesnook/ui";
 import { hashNavigate, navigate } from "../../navigation";
@@ -164,9 +165,22 @@ export function Notebook(props: NotebookProps) {
         </Flex>
       }
       footer={
-        <Text variant="subBody">
-          {currentContext ? currentContext?.length : totalNotes}
-        </Text>
+        <Flex sx={{ alignItems: "center", gap: 1 }}>
+          {item.password ? (
+            db.notebooks.cache.lockOpenedNotebooks.includes(item.id) ? (
+              <UnlockVariant
+                title="Notebook opened"
+                variant="subBody"
+                size={12}
+              />
+            ) : (
+              <Lock title="Notebook locked" variant="subBody" size={12} />
+            )
+          ) : null}
+          <Text variant="subBody">
+            {currentContext ? currentContext?.length : totalNotes}
+          </Text>
+        </Flex>
       }
       menuItems={notebookMenuItems}
       context={{ refresh, isRoot: depth === 0 }}

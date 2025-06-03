@@ -94,6 +94,7 @@ export type LockedNotebookEditorSession = BaseEditorSession & {
   type: "locked:notebook";
   oldType: SessionType;
   note: Note;
+  content?: NoteContent<false>;
 };
 
 export type LockedEditorSession = BaseEditorSession & {
@@ -838,12 +839,16 @@ class EditorStore extends BaseStore<EditorStore> {
         options.silent
       );
     } else if (isNotebookLocked && note.type !== "trash") {
+      const content = note.contentId
+        ? await db.content.get(note.contentId)
+        : undefined;
       this.addSession(
         {
           type: "locked:notebook",
           id: sessionId,
           note,
           oldType: activeSession?.type || "default",
+          content: content?.locked ? undefined : content,
           activeBlockId: options.activeBlockId,
           tabId
         },
