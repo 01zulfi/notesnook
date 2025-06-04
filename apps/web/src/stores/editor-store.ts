@@ -1383,6 +1383,22 @@ class EditorStore extends BaseStore<EditorStore> {
     sessionId = sessionId || tab?.sessionId;
     if (sessionId) this.rehydrateSession(sessionId);
   };
+
+  replaceSessionWithLockedNotebookSession = (noteId: string) => {
+    this.set((state) => {
+      state.sessions = state.sessions.map((session) => {
+        if ("note" in session && session.note.id === noteId) {
+          if (session.type === "locked:notebook") return session;
+          return {
+            ...session,
+            type: "locked:notebook",
+            oldType: session.type
+          } as LockedNotebookEditorSession;
+        }
+        return session;
+      });
+    });
+  };
 }
 
 const useEditorStore = createPersistedStore(EditorStore, {

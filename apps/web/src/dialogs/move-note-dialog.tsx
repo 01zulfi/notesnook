@@ -48,6 +48,7 @@ import {
   VirtualizedTree,
   VirtualizedTreeHandle
 } from "../components/virtualized-tree";
+import { useEditorStore } from "../stores/editor-store";
 
 type MoveNoteDialogProps = BaseDialogProps<boolean> & { noteIds: string[] };
 export type SelectedReference = {
@@ -149,6 +150,11 @@ export const MoveNoteDialog = DialogManager.register(function MoveNoteDialog({
               if (item.isLocked) {
                 await db.notes.removeFromAllNotebooks(...noteIds);
                 await db.notes.addToNotebook(item.id, ...noteIds);
+                noteIds.forEach((id) => {
+                  useEditorStore
+                    .getState()
+                    .replaceSessionWithLockedNotebookSession(id);
+                });
                 break;
               }
 
