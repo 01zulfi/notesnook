@@ -87,7 +87,7 @@ export type BaseEditorSession = {
   /**
    * The index of search result to scroll to after opening the session successfully.
    */
-  activeSearchResultIndex?: number;
+  activeSearchResultIndex?: string;
 };
 
 export type LockedEditorSession = BaseEditorSession & {
@@ -666,7 +666,7 @@ class EditorStore extends BaseStore<EditorStore> {
       silent?: boolean;
       openInNewTab?: boolean;
       rawContent?: string;
-      activeSearchResultIndex?: number;
+      activeSearchResultIndex?: string;
     } = {}
   ): Promise<void> => {
     const {

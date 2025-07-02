@@ -865,12 +865,17 @@ function useScrollToSearchResult(session: EditorSession) {
       `editorScroll_${session.id}`
     );
     scrollContainer?.closest(".active")?.classList.add("searching");
-    const elements = scrollContainer?.getElementsByTagName("nn-search-result");
+    // const elements = scrollContainer?.getElementsByTagName("nn-search-result");
+    const element = scrollContainer?.querySelector(`nn-search-result#${index}`);
     setTimeout(
       () =>
-        elements
-          ?.item(index)
-          ?.scrollIntoView({ block: "center", behavior: "instant" }),
+        element?.scrollIntoView({
+          block: "center",
+          behavior: "instant"
+        }),
+      // elements
+      // ?.item(index)
+      // ?.scrollIntoView({ block: "center", behavior: "instant" }),
       100
     );
     useEditorStore.getState().updateSession(session.id, [session.type], {

@@ -143,10 +143,12 @@ function SearchResult(props: SearchResultProps) {
               item={item}
               menuItems={menuItems}
               onClick={() => {
+                console.log("search item", item);
                 useEditorStore.getState().openSession(item.id, {
                   rawContent: item.rawContent,
                   force: true,
-                  activeSearchResultIndex: findSelectedMatchIndex(item, index)
+                  activeSearchResultIndex: match[0].id!
+                  // activeSearchResultIndex: findSelectedMatchIndex(item, index)
                 });
               }}
               onMiddleClick={() => {
