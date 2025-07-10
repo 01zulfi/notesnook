@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Flex, Text, Button, Input, Switch } from "@theme-ui/components";
+import { Flex, Text, Button, Input, Switch, Badge } from "@theme-ui/components";
 import Dialog from "../../components/dialog";
 import {
   About,
@@ -472,12 +472,28 @@ function SettingItem(props: { item: Setting }) {
         }}
       >
         <Flex sx={{ flexDirection: "column", flex: 1 }}>
-          <Text
-            variant={"body"}
-            sx={{ fontWeight: "medium", color: "heading" }}
-          >
-            {item.title}
-          </Text>
+          <Flex sx={{ alignItems: "center", gap: 2 }}>
+            <Text
+              variant={"body"}
+              sx={{ fontWeight: "medium", color: "heading" }}
+            >
+              {item.title}
+            </Text>
+            {useUserStore.getState().isLoggedIn && item.localOnly ? (
+              <Text
+                variant="subBody"
+                title={strings.localOnlySettingDesc()}
+                sx={{
+                  background: "accent",
+                  color: "background",
+                  borderRadius: "12px",
+                  px: 2
+                }}
+              >
+                {strings.localOnly()}
+              </Text>
+            ) : null}
+          </Flex>
           {item.description && (
             <Text
               as={"div"}
